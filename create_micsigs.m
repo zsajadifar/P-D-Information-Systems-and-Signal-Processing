@@ -7,7 +7,8 @@ speechfilename{1} = 'speech1.wav';
 % speechfilename{2} = 'speech2.wav';
 % noisefilename{1}  = 'whitenoise_signal_1.wav';
 % noisefilename{1}  = 'whitenoise_signal_2.wav';
-noisefilename{1}  = 'Babble_noise1.wav';
+%noisefilename{1}  = 'Babble_noise1.wav';
+noisefilename=[];
 
 mic_length = 10; % desired length of microphone signals in Sec
 mic_num = size(RIR_sources,2); 
@@ -19,7 +20,7 @@ plot(mic(:,1))
 hold on
 plot(mic(:,2))
 
-soundsc(mic(:,1),fs_RIR)
+soundsc(mic(:,2),fs_RIR)
 
 
 function [mic] = create_mic_sigs(speechfilename,noisefilename,mic_length,mic_num,fs_RIR,RIR_sources,RIR_noise)
@@ -30,8 +31,7 @@ function [mic] = create_mic_sigs(speechfilename,noisefilename,mic_length,mic_num
         [speech,fs] = audioread(speechfilename{i});
         % resampling
         if(fs ~= fs_RIR)
-            t = 0:1/fs_RIR:length(speech)/fs -1/fs_RIR;
-            speech = resample(speech,t,fs_RIR);
+            speech = resample(speech,fs_RIR,fs);
         end
         mic_targets= mic_targets+fftfilt(RIR_sources(:,:,i),speech(1:L));
     end
@@ -40,8 +40,7 @@ function [mic] = create_mic_sigs(speechfilename,noisefilename,mic_length,mic_num
         [noise,fs] = audioread(noisefilename{i});
         %resampling
         if(fs ~= fs_RIR)
-            t = 0:1/fs_RIR:length(noise)/fs -1/fs_RIR;
-            noise = resample(noise,t,fs_RIR);
+            noise = resample(noise,fs_RIR,fs);
         end
         mic_noises= mic_noises+fftfilt(RIR_noise(:,:,i),noise(1:L));
     end
