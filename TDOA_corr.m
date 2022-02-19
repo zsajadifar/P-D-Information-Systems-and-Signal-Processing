@@ -1,68 +1,36 @@
-%% Week1,part3,Cross-correlation-based TDOA estimation
-clear all
-load('D:\KU Leuven\Semester 2\P&D\week1\sim_environment\Computed_RIRs.mat');
+function TDOA_est = TDOA_corr(mic)
 
-%% ground truth for TDOA estimation 
+% segment_length = 4000;
+% segment_start = 1;
+% segment = mic(segment_start:segment_start+segment_length,2);
+% [r,lag] = xcorr(mic(:,1),segment);
+% [~,indx] = max(abs(r));
+% TDOA_est = (lag(indx));
+% figure,stem(lag,r)
+% xlabel('lag')
+% ylabel('cross correlation')
+% title('time domain cross correlation function')
 
-figure,
-plot(RIR_sources(:,1),'r')
-hold on
-plot(RIR_sources(:,2),'b')
+    seg_length = 3000;
+    test_length = 500;
 
-indx1 = find(RIR_sources(:,1)~=0);
-indx2 = find(RIR_sources(:,2)~=0);
+    ref = mic(42000:42000+seg_length, 1);
+    target = mic(:, 2);
 
-TDOA_groundtruth = abs(indx1(1)-indx2(1));
+    TDOA_est = 0;
 
-%% estimated TDOA
-%speechfilename{1} = 'whitenoise_signal_1.wav';
-speechfilename{1} = 'part1_track1_dry.wav';
-noisefilename=[];
-mic_length = 10; % desired length of microphone signals in Sec
-mic_num = size(RIR_sources,2); 
-mic = create_mic_sigs(speechfilename,noisefilename,mic_length,mic_num,fs_RIR,RIR_sources,RIR_noise);
-
-figure,
-plot(mic(:,1),'r')
-hold on
-plot(mic(:,2),'b')
-
-segment = mic(1:40000,2);
-[r,lag] = xcorr(mic(:,1),segment);
-[max_corr,indx] = max(abs(r));
-TDOA_estimated = abs(lag(indx));
-figure,stem(lag,r)
-title('time domain cross correlation function')
-
-differnce= TDOA_estimated - TDOA_groundtruth
-
-
-
-function [mic] = create_mic_sigs(speechfilename,noisefilename,mic_length,mic_num,fs_RIR,RIR_sources,RIR_noise)
-    L = mic_length*fs_RIR;
-    mic_targets=zeros(L,mic_num);
-    mic_noises =zeros(L,mic_num);
-    for i=1:length(speechfilename)
-        [speech,fs] = audioread(speechfilename{i});
-        % resampling
-        if(fs ~= fs_RIR)
-            speech = resample(speech,fs_RIR,fs);
+    % scan the second microphone signal
+    for start=42000:42000+test_length
+        [ccor, ~,  ~] = crosscorr(ref, target(start:start+length(ref)), 'NumLags', ceil(0.2 * length(ref)));
+        [ccor_max, ind] = max(ccor);
+        if(ccor_max > 0.6)
+            % terminate
+            TDOA_est = round((length(ccor) + 1)/2) - ind;
+            fprintf("TDOA: %d samples\n", TDOA_est);
+            break;
         end
-        mic_targets= mic_targets+fftfilt(RIR_sources(:,:,i),speech(1:L));
     end
     
-    for i=1:length(noisefilename)
-        [noise,fs] = audioread(noisefilename{i});
-        %resampling
-        if(fs ~= fs_RIR)
-            noise = resample(noise,fs_RIR,fs);
-        end
-        mic_noises= mic_noises+fftfilt(RIR_noise(:,:,i),noise(1:L));
-    end
-    mic = mic_noises + mic_targets;
-    save('mic.mat','mic','fs_RIR');
+    figure,
+    crosscorr(ref, target(start:start+length(ref)), 'NumLags', ceil(0.2 * length(ref)));
 end
-
-
-
-
