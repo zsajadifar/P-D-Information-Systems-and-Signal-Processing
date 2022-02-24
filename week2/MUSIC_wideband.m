@@ -44,7 +44,7 @@ figure,loglog(abs(p_averaged))
 title('averaged power'),xlabel('theta')
 [pks,loc] = findpeaks(abs(p_averaged));
 [~,index] = maxk(pks, Q);
-hold on,loglog(index,pks(index))
+hold on,loglog(loc(index),pks((index)),'*')
 DOA_est=loc(index);
 DOA_est = DOA_est*0.5;
 save("DOA_est.mat", "DOA_est");
