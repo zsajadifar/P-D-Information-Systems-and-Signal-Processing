@@ -2,8 +2,8 @@ clear
 load('Computed_RIRs.mat')
 assert(fs_RIR==44100,'fs should be 44.1 KHz')
 speechfilename{1} = 'speech1.wav'; 
-%  noisefilename = [];
-noisefilename{1}='White_noise1.wav';
+ noisefilename = [];
+% noisefilename{1}='White_noise1.wav';
 %  noisefilename{1}='Babble_noise1.wav';
 % noisefilename{1}='speech2.wav';
 M = size(RIR_sources,2);
@@ -13,8 +13,8 @@ mic_length = 3; % desired length of microphone signals in Sec
 %% speech
 Q = size(RIR_sources,3);
 L=1024;
-overlap=512;
-[mic_stft,freq,~] = stft(mic,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'FrequencyRange','onesided');
+overlap=L/2;
+[mic_stft,freq,~] = stft(speech,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'FrequencyRange','onesided');
 mic_stft = permute(mic_stft,[3 1 2]);% M*n_F*n_T
 power = mean(mean(abs(mic_stft).^2,3),1);
 [~,W_max_indx] = max(power);
@@ -70,8 +70,8 @@ title('the first mic signal and the DAS BF signal')
 xlabel('t')
 legend('mic','DAS out')
 
-soundsc(DAS_out,fs_RIR);    
-soundsc(mic(:,1),fs_RIR); 
+% soundsc(DAS_out,fs_RIR);    
+% soundsc(mic(:,1),fs_RIR); 
 
 
 

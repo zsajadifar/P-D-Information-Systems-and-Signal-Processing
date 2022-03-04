@@ -2,21 +2,21 @@ clear
 load('Computed_RIRs.mat')
 assert(fs_RIR==44100,'fs should be 44.1 KHz')
 speechfilename{1} = 'speech1.wav'; 
-noisefilename=[];
+%  noisefilename = [];
+noisefilename{1}='White_noise1.wav';
+%  noisefilename{1}='Babble_noise1.wav';
+% noisefilename{1}='speech2.wav';
 M = size(RIR_sources,2);
-mic_length = 5; % desired length of microphone signals in Sec
+mic_length = 3; % desired length of microphone signals in Sec
 [mic,noise,speech,SNR] = create_micsigs(speechfilename,noisefilename,mic_length,M,fs_RIR,RIR_sources,RIR_noise);
 
 %% speech
 Q = size(RIR_sources,3);
 L=1024;
-overlap=512;
-[mic_stft,freq,~] = stft(mic,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'FrequencyRange','onesided');
+overlap=L/2;
+[mic_stft,freq,~] = stft(speech,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'FrequencyRange','onesided');
 mic_stft = permute(mic_stft,[3 1 2]);% M*n_F*n_T
 power = mean(mean(abs(mic_stft).^2,3),1);
-% figure,plot(freq,10*log10(power))
-% xlabel('frequency'); ylabel('power')
-% title('Power, averaged over all mics and time frames')
 [~,W_max_indx] = max(power);
 
 c=340;
@@ -34,10 +34,7 @@ for i=2:L/2
     E = V(:,1:M-Q);
     G = exp(-1j*omega_max*TDOA);
     p(:,i) = 1./diag((G'*E)*E'*G);
-    p_averaged= p_averaged .* p(:,i);
-%     figure,stem(abs(p))
-%     hold on
-%     plot(abs(p(:,i)))   
+    p_averaged= p_averaged .* p(:,i);  
 end
 
 figure,loglog(abs(p_averaged))
@@ -61,9 +58,9 @@ speech_DAS =scale*sum(speech_delayed,2);
 noise_delayed = delayseq(noise,delay);
 noise_DAS =scale*sum(noise_delayed,2);
 
-DAS_out = scale*(speech_DAS + noise_DAS);
+DAS_out = speech_DAS + noise_DAS;
 
-SNR_out_DAS = var(speech_DAS)/var(noise_DAS);
+SNR_out_DAS = 10*log10(var(speech_DAS)/var(noise_DAS));
 
 figure,
 plot(mic(:,1),'r')
@@ -71,13 +68,10 @@ hold on,
 plot(DAS_out,'b')
 title('the first mic signal and the DAS BF signal')
 xlabel('t')
-legend('mic','DAS_out')
+legend('mic','DAS out')
 
-% legend('mic','DAS')
-% soundsc(DAS_out,fs_RIR)
-% soundsc(mic(:,1),fs_RIR)
-
-
+soundsc(DAS_out,fs_RIR);    
+soundsc(mic(:,1),fs_RIR); 
 
 
 
