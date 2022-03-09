@@ -13,17 +13,16 @@ B = [ones(M-1,1),B];
 mic_delayed = speech_delayed + noise_delayed;
 desired=[zeros(delta,1);DAS_out]; %% delayed DAS_out
 VAD=abs(speech(:,1))>std(speech(:,1))*1e-3;
-
 X = mic_delayed * B';
-X = (~VAD).*X;
 W = zeros(L,M-1);
 err =zeros(numel(desired),1);
+
 
 for i=L:length(X(:,1))
     X_norm=norm(X(i-L+1:i,:));
     t(i) = trace(W'*X(i-L+1:i,:));
     err(i)=desired(i)-t(i);
-    W=W + (mu/((X_norm^2)+alpha)*X(i-L+1:i,:)*err(i));
+    W = W +(~VAD(i).*(mu/((X_norm^2)+alpha)*X(i-L+1:i,:)*err(i)));
 end
 
 GSC_out=err(L/2+1:end);
@@ -38,7 +37,6 @@ legend('mic','DAS out','GSC out','speech DAS')
 signal_power=var(GSC_out(VAD==1));
 noise_power=var(GSC_out(VAD==0));    
 SNR_out_GSC=10*log10((signal_power-noise_power)/noise_power);
-
 
 soundsc(X(:,1),fs_RIR);                  
 soundsc(DAS_out,fs_RIR);
