@@ -55,8 +55,33 @@ DOA_target=DOA_est(I);
 [RIR_stft,freq,~] = stft(RIR_sources(:,:,I),fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'FrequencyRange','onesided');
 a = squeeze(mean(RIR_stft,2));
 h = a ./ a(:,1);
+h = h(2:end,:);
 w_FAS = h./(diag(h'*h))';
-B = null(h');
+for i=1:L/2
+    A = h(i,:);
+    B (:,:,i)= null(A)';
+end
+
+
+%% 
+mic_stft = mean(mic_stft(:,2:end,:),3);
+
+desired = diag(mic_stft'*w_FAS');
+
+W = zeros(L/2,M-1);
+err =zeros(numel(desired),1);
+
+for i=1:512
+    X(i,:)=mic_stft(:,i)*B(:,:,i);
+
+for i=L:length(X(:,1))
+    X_norm=norm(X(i-L+1:i,:));
+    t(i) = trace(W'*X(i-L+1:i,:));
+    err(i)=desired(i)-t(i);
+    W = W +(~VAD(i).*(mu/((X_norm^2)+alpha)*X(i-L+1:i,:)*err(i)));
+end
+
+GSC_out=err(L/2+1:end);
 
 
 
