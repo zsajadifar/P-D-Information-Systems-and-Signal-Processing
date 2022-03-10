@@ -64,27 +64,29 @@ end
 
 
 %% 
-mic_stft = mean(mic_stft(:,2:end,:),3);
+mic_stft_mean= mean(mic_stft(:,2:end,:),3);
 
-desired = diag(mic_stft'*w_FAS');
+desired = diag(mic_stft_mean.'*w_FAS.');
 
+mu = 0.5;
+alpha = 10^-4;
 W = zeros(L/2,M-1);
 err =zeros(numel(desired),1);
 
-for i=1:512
-    X(i,:)=mic_stft(:,i)*B(:,:,i);
-
-for i=L:length(X(:,1))
-    X_norm=norm(X(i-L+1:i,:));
-    t(i) = trace(W'*X(i-L+1:i,:));
-    err(i)=desired(i)-t(i);
-    W = W +(~VAD(i).*(mu/((X_norm^2)+alpha)*X(i-L+1:i,:)*err(i)));
+for i=1:size(B,3)
+    X(i,:)=B(:,:,i)*mic_stft(:,i);
 end
 
-GSC_out=err(L/2+1:end);
+for i=2:length(X(:,1))
+    X_norm = X(i,:)*X(i,:)';
+    t(i)= X(i,:)*W(i-1,:)';
+    err(i)=desired(i)-t(i);
+    W(i,:) = W(i-1,:) + (mu/((X_norm^2)+alpha))*X(i,:)*conj(err(i));
+end
 
-
-
+err_sym = [flip(conj(err(2:end)));err;0];
+istft(err_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola');
+% soundsc(ans,fs_RIR)
 
 
 

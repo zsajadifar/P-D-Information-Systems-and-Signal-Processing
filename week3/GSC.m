@@ -22,7 +22,7 @@ for i=L:length(X(:,1))
     X_norm=norm(X(i-L+1:i,:));
     t(i) = trace(W'*X(i-L+1:i,:));
     err(i)=desired(i)-t(i);
-    W = W +(~VAD(i).*(mu/((X_norm^2)+alpha)*X(i-L+1:i,:)*err(i)));
+    W = W +((~VAD(i)).*(mu/((X_norm^2)+alpha)*X(i-L+1:i,:)*err(i)));
 end
 
 GSC_out=err(L/2+1:end);
@@ -38,6 +38,8 @@ signal_power=var(GSC_out(VAD==1));
 noise_power=var(GSC_out(VAD==0));    
 SNR_out_GSC=10*log10((signal_power-noise_power)/noise_power);
 
-soundsc(X(:,1),fs_RIR);                  
+soundsc(X(:,1),fs_RIR);
+soundsc(t,fs_RIR); 
+% figure,plot(t)
 soundsc(DAS_out,fs_RIR);
 soundsc(GSC_out,fs_RIR);    
