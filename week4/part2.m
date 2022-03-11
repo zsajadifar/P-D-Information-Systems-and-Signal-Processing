@@ -30,6 +30,11 @@ for i=1:5
     [mic_rev(:,:,i),~,~,SNR] = create_micsigs(speechfilename,noisefilename,mic_length,M,fs_RIR,RIR_rev(:,:,:,i),RIR_noise);
 end
 
+for j=1:5
+    
+
+end
+
 
 
 

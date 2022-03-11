@@ -1,11 +1,11 @@
 clear 
 load('Computed_RIRs.mat')
 assert(fs_RIR==44100,'fs should be 44.1 KHz')
-speechfilename{1} = 'speech1.wav'; 
-speechfilename{2} = 'speech2.wav'; 
- noisefilename = [];
+speechfilename{1} = 'speech2.wav'; % noise source
+speechfilename{2} = 'speech1.wav'; % target source
+noisefilename = [];
 % noisefilename{1}='White_noise1.wav';
-%  noisefilename{1}='Babble_noise1.wav';
+% noisefilename{1}='Babble_noise1.wav';
 % noisefilename{1}='speech2.wav';
 M = size(RIR_sources,2);
 mic_length = 3; % desired length of microphone signals in Sec
@@ -55,38 +55,45 @@ DOA_target=DOA_est(I);
 [RIR_stft,freq,~] = stft(RIR_sources(:,:,I),fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'FrequencyRange','onesided');
 a = squeeze(mean(RIR_stft,2));
 h = a ./ a(:,1);
-h = h(2:end,:);
+% h = h(2:end,:);
 w_FAS = h./(diag(h'*h))';
-for i=1:L/2
+
+for i=1:L/2+1
     A = h(i,:);
     B (:,:,i)= null(A)';
 end
 
+%% Filtering and NLMS
 
-%% 
-mic_stft_mean= mean(mic_stft(:,2:end,:),3);
-
-desired = diag(mic_stft_mean.'*w_FAS.');
-
-mu = 0.5;
+mu = 0.01;
 alpha = 10^-4;
-W = zeros(L/2,M-1);
-err =zeros(numel(desired),1);
 
-for i=1:size(B,3)
-    X(i,:)=B(:,:,i)*mic_stft(:,i);
+for j=1:size(mic_stft,3)%time
+    W = zeros(size(mic_stft,2),M-1);
+    for i=1:size(mic_stft,2)%freq
+        u = mic_stft(:,i,j);
+        desired(i,j) = conj(w_FAS(i,:))*u;
+
+        X=conj(B(:,:,i))*u;
+        X_norm = X'*X;
+        t(i,j)= conj(W(i,:))*X;
+        err(i,j)=desired(i,j)-t(i,j);
+        W(i+1,:) = W(i,:).' + (mu/((X_norm^2)+alpha))*X*conj(err(i,j));
+
+    end
+    desired_sym(:,j)= [flip(conj(desired(2:end-1,j)));0;desired(2:end-1,j);0];
+    err_sym(:,j)= [flip(conj(err(2:end-1,j)));0;err(2:end-1,j);0];
+
 end
 
-for i=2:length(X(:,1))
-    X_norm = X(i,:)*X(i,:)';
-    t(i)= X(i,:)*W(i-1,:)';
-    err(i)=desired(i)-t(i);
-    W(i,:) = W(i-1,:) + (mu/((X_norm^2)+alpha))*X(i,:)*conj(err(i));
-end
+desired_time=istft(desired_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
+err_time=istft(err_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
 
-err_sym = [flip(conj(err(2:end)));err;0];
-istft(err_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola');
-% soundsc(ans,fs_RIR)
+figure,plot(err_time(40:end-40))
+figure,plot(desired_time(40:end-40))
+soundsc(err_time(40:end-40),fs_RIR)
+soundsc(desired_time(50:end-50),fs_RIR)
+
 
 
 
