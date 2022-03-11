@@ -65,7 +65,7 @@ end
 
 %% Filtering and NLMS
 
-mu = 0.01;
+mu = 10^-11;
 alpha = 10^-5;
 
 for j=1:size(mic_stft,3)%time
@@ -86,12 +86,15 @@ for j=1:size(mic_stft,3)%time
 
 end
 
-desired_time=istft(desired_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
-err_time=istft(err_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
+desired_time =istft(desired_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
+err_time     =istft(err_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
 
 figure,plot(err_time(100:end-100))
+title('GSC final out')
 figure,plot(desired_time(100:end-100))
+title('output of FAS')
 soundsc(err_time(100:end-100),fs_RIR)
+
 % soundsc(desired_time(100:end-100),fs_RIR)
 
 

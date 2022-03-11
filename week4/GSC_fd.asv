@@ -66,7 +66,7 @@ end
 %% Filtering and NLMS
 
 mu = 0.01;
-alpha = 10^-4;
+alpha = 10^-5;
 
 for j=1:size(mic_stft,3)%time
     W = zeros(size(mic_stft,2),M-1);
@@ -89,10 +89,12 @@ end
 desired_time=istft(desired_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
 err_time=istft(err_sym,fs_RIR,'Window',hann(L),'OverlapLength',overlap,'FFTLength',L,'Method','wola','ConjugateSymmetric',true);
 
-figure,plot(err_time(40:end-40))
-figure,plot(desired_time(40:end-40))
-soundsc(err_time(40:end-40),fs_RIR)
-soundsc(desired_time(50:end-50),fs_RIR)
+figure,plot(err_time(100:end-100))
+title('GSC_out')
+figure,plot(desired_time(100:end-100))
+title('out ')
+soundsc(err_time(100:end-100),fs_RIR)
+% soundsc(desired_time(100:end-100),fs_RIR)
 
 
 

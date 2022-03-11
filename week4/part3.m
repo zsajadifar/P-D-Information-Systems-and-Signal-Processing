@@ -33,7 +33,7 @@ Q = size(RIR_sources,3);
 mic_length = 3; % desired length of microphone signals in Sec
 [mic,noise,speech,SNR] = create_micsigs(speechfilename,noisefilename,mic_length,M,fs_RIR,RIR_sources,RIR_noise);
 
-%% speech
+%% DOA
 
 L=1024;
 overlap=L/2;
@@ -71,4 +71,4 @@ DOA_est=sort(DOA_est);
 save("DOA_est.mat", "DOA_est");
 
 [~,I]= min(abs(DOA_est-90));
-DOA_target=DOA_est(I);
+DOA_target=DOA_est(I)
