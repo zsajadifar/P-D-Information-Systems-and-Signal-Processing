@@ -12,12 +12,19 @@ for i=1:37
             UnattendedSpeaker=string(EEG{i,1}.trial{j,1}.UnattendedTrack.SexOfSpeaker);
             if SNR==100 && AttendedSpeaker=='M' && UnattendedSpeaker=='F'
                 eeg = cat(1,eeg,EEG{i,1}.trial{j,1}.eegprepro.reg);
-                env_name = {EEG{i,1}.trial{j,1}.AttendedTrack.Envelope};
-                num  = sscanf(sprintf('%s', env_name{:}),'envelope_track_%d.wav');
-                env = cat(1,env,env_reg(:,num));
+                env_attend_name = {EEG{i,1}.trial{j,1}.AttendedTrack.Envelope};
+                env_unattend_name = {EEG{i,1}.trial{j,1}.UnattendedTrack.Envelope};
+
+                num_attend(j)  = sscanf(sprintf('%s', env_attend_name{:}),'envelope_track_%d.wav');
+                num_unattend(j) = sscanf(sprintf('%s', env_unattend_name{:}),'envelope_track_%d.wav');
+
+                env = cat(1,env,env_reg(:,num_attend(j)));
             end
     end
-%     [s1(i),s2(i)]=size(eeg);
+
+    num_attend(num_attend==0)=[];
+    num_unattend(num_unattend==0)=[];
+
 
     if ~isempty(eeg)
         eeg_train = eeg(1:5000,:);
@@ -30,31 +37,25 @@ for i=1:37
         for k=1:size(eeg_train,1)-L+1
             m = eeg_train(k:k+L-1,:);
             m = m(:);
-            A(k,:) = m;
-%             s(k) = env_train(k);
-% %             R = m*m';
-% %             r = m*s(k);
-%             d_tilda(:,k) =R\r;
-% 
-%             s_tilda(k) = (d_tilda(:,k)')*m;
+            M(k,:) = m;
         end
-
-        d = A\env_train(1:k);
-%         err = mean((abs(s_tilda-s)).^2);
+        R = M'*M;
+        r = M'*env_train(1:k); 
+        d(:,i) = R\r;
 
         %% test
-        L=6;
         for k=1:size(eeg_test,1)-L+1
             m = eeg_test(k:k+L-1,:);
             m = m(:);
-            B(k,:) = m;
-
-%             s_test(k) = env_test(k);
-%             s_tilda_test(k) = (d_tilda(:,k)')*m;
+            M_test(k,:) = m;
         end
-        err = mean((abs(B*d-env_test(1:k))).^2);
+        env_hat = M_test*d(:,i);
 
+        a = corr(env_hat,env_reg(1:k,num_attend(end)), 'type', 'Spearman');
+        b = corr(env_hat,env_reg(1:k,num_unattend(end)), 'type', 'Spearman');   
+        c(i)= a> b;
     end
-
 end
+
+accuracy = sum(c)/numel(c);
 
