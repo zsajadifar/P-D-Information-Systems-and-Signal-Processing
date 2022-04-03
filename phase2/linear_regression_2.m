@@ -1,6 +1,6 @@
 clear 
-load("env_data_butter.mat")
-load("EEG_butter.mat")
+load("env_data.mat")
+load("EEG.mat")
 warning off
 L=6;
 window_time=[1000,500,200,100,40,20];

@@ -1,4 +1,5 @@
 function y = lag_matrix(x,lag)
+
 % x is eeg matrix: t*64
 y=[];
 for i=1:size(x,2)

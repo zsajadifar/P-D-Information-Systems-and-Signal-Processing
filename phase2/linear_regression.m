@@ -1,6 +1,6 @@
 clear 
-load("env_data_butter.mat")
-load("EEG_butter.mat")
+load("env_data.mat")
+load("EEG.mat")
 
 
 for i=1:37

@@ -49,3 +49,4 @@ for k=1:numel(audio_files)
 
 end
 
+save('env_data.mat',"env_reg","env_cnn","-v7.3")
