@@ -47,4 +47,4 @@ for i=1:37
         i
 end
 
-save('EEG_butter.mat',"EEG","-v7.3")
+save('EEG.mat',"EEG","-v7.3")
