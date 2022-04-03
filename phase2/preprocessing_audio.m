@@ -36,8 +36,13 @@ for k=1:numel(audio_files)
     A_cnn = sum(A_cnn,2);
 
     %% step7, bandpass filter
-    A_reg = bandpass(A_reg,[1 9],20);
-    A_cnn = bandpass(A_cnn,[1 32],70);
+    [b1,a1] = butter(5,[1 9]/(20/2),'bandpass');
+    [b2,a2] = butter(5,[1 32]/(70/2),'bandpass');
+    A_reg = filter(b1,a1,A_reg);
+    A_cnn = filter(b2,a2,A_cnn);
+
+%     A_reg = bandpass(A_reg,[1 9],20);
+%     A_cnn = bandpass(A_cnn,[1 32],70);
 
     env_reg(:,k)= A_reg;
     env_cnn(:,k)= A_cnn;

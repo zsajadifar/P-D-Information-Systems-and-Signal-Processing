@@ -1,6 +1,6 @@
 clear 
-load("env_data.mat")
-load("EEG.mat")
+load("env_data_butter.mat")
+load("EEG_butter.mat")
 
 
 for i=1:37
@@ -34,25 +34,17 @@ for i=1:37
 
         %% train
         L=6;
-        for k=1:size(eeg_train,1)-L+1
-            m = eeg_train(k:k+L-1,:);
-            m = m(:);
-            M(k,:) = m;
-        end
+        M = lag_matrix(eeg_train,L);
         R = M'*M;
-        r = M'*env_train(1:k); 
+        r = M'*env_train(1:end-L+1); 
         d(:,i) = R\r;
 
         %% test
-        for k=1:size(eeg_test,1)-L+1
-            m = eeg_test(k:k+L-1,:);
-            m = m(:);
-            M_test(k,:) = m;
-        end
+        M_test= lag_matrix(eeg_test,L);       
         env_hat = M_test*d(:,i);
 
-        a = corr(env_hat,env_reg(1:k,num_attend(end)), 'type', 'Spearman');
-        b = corr(env_hat,env_reg(1:k,num_unattend(end)), 'type', 'Spearman');   
+        a = corr(env_hat,env_reg(1:end-L+1,num_attend(end)), 'type', 'Spearman');
+        b = corr(env_hat,env_reg(1:end-L+1,num_unattend(end)), 'type', 'Spearman');   
         c(i)= a> b;
     end
 end
