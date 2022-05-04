@@ -39,17 +39,17 @@ function [DOA_est,spectrogram]= MUSIC_wideband(mic)
     
     p_mean = p_mean.^(1/(cutoff-1));
     
-    %% CFAR
-    cfar = phased.CFARDetector();
-    cfar.ThresholdOutputPort = true;
-    cfar.ThresholdFactor = 'Custom';
-    cfar.CustomThresholdFactor = 1.2;
-    cfar.NumTrainingCells = 6;
-    cfar.NumGuardCells = 10;
-    [detected, ~] = cfar(abs(p_mean), 1:length(p_mean));
-    detected = detected.*abs(p_mean);
-    figure,plot(detected)
-    [peaks, p_pos] = findpeaks(detected);
+%     %% CFAR
+%     cfar = phased.CFARDetector();
+%     cfar.ThresholdOutputPort = true;
+%     cfar.ThresholdFactor = 'Custom';
+%     cfar.CustomThresholdFactor = 1.2;
+%     cfar.NumTrainingCells = 6;
+%     cfar.NumGuardCells = 10;
+%     [detected, ~] = cfar(abs(p_mean), 1:length(p_mean));
+%     detected = detected.*abs(p_mean);
+%     figure,plot(detected)
+%     [peaks, p_pos] = findpeaks(detected);
   
     figure,plot(real(p_mean))
     [peaks, p_pos] = findpeaks(real(p_mean));

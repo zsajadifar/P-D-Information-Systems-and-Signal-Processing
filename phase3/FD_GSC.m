@@ -3,17 +3,17 @@ function [fas_out,gsc_speech]=FD_GSC(mic, w_FAS,B)
 %% zeropad mic signal
 fs_RIR = 44100;
 num_mics = size(mic, 2);
-zeropad = 100;
+zeropad = 1000;
 mic = [zeros(zeropad,num_mics);mic;zeros(zeropad,num_mics)];
 
 %% STFT
 L = 1024;
-win = hamming(L);
+win = (hamming(L));
 [mic_stft, ~, ~] = stft(mic, 'Window', win, 'OverlapLength',L/2, 'FFTLength', L, 'FrequencyRange', 'onesided');
 mic_stft = permute(mic_stft, [3, 2, 1]);
 
 %% Filtering and NLMS
-mu = 0.01;
+mu = 0.001;
 alpha = 10^-5;
 
 err = zeros(L, size(mic_stft, 2));

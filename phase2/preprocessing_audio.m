@@ -25,8 +25,10 @@ for k=1:numel(audio_files)
     end
     
     %% step4, power law compression
-    A_filt = abs(A_filt).^0.6;
-    
+    x = abs(A_filt).^0.6;
+%     x(A_filt<0)=-x(A_filt<0);
+    A_filt = x;
+
     %% step5, downsampling
     A_reg = resample(A_filt,20,fs);
     A_cnn = resample(A_filt,70,fs);

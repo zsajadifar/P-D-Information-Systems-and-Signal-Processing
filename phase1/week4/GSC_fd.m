@@ -1,10 +1,10 @@
 clear 
 load('Computed_RIRs.mat')
 assert(fs_RIR==44100,'fs should be 44.1 KHz')
-speechfilename{1} = 'speech2.wav'; % noise source
+speechfilename{1} = 'whitenoise_signal_1.wav'; % noise source
 speechfilename{2} = 'speech1.wav'; % target source
 noisefilename = [];
-% noisefilename{1}='White_noise1.wav';
+% noisefilename{1}='whitenoise_signal_1.wav';
 % noisefilename{1}='Babble_noise1.wav';
 % noisefilename{1}='speech2.wav';
 M = size(RIR_sources,2);

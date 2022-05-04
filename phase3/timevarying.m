@@ -16,11 +16,11 @@ RIR_rev = cat(4,RIR_75_165_rev,RIR_60_150_rev,RIR_45_135_rev,RIR_30_120_rev,RIR_
 
 RIR_noise=[];
 fs_RIR=44100;
-speechfilename{1} = 'wav/part1_track1_dry.wav'; 
-speechfilename{2} = 'wav/whitenoise_signal_1.wav'; 
+speechfilename{1} = 'wav/part1_track2_dry.wav'; 
+speechfilename{2} = 'wav/part1_track1_dry.wav'; 
 noisefilename = [];
 M = 5;
-mic_length = 5; % sec
+mic_length = 10; % sec
 
 for i=1:5
     [mic(:,:,i),~,~,SNR] = create_micsigs(speechfilename,noisefilename,mic_length,M,fs_RIR,RIR(:,:,:,i),RIR_noise,i);
